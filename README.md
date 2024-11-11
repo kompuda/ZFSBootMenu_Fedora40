@@ -6,7 +6,35 @@
 - Find out whatever the source of truth is for the zfs linux version and compatibility with kernel version. Possibly automate that?
 - Only update after a ZFS snapshot
 
-Cut Down Code to Cut Down Copy Pasta
+[Linux home directory on ZFS](https://discourse.practicalzfs.com/t/linux-home-directory-on-zfs/1429/5)
+From Jim Salter
+What you do is, you don’t have an explicit mountpoint for the home dataset in each of your operating systems at all. 
+You simply nest the home dataset for each operating system as a child of the root dataset for that OS.
+**I use a separate dataset, but mounted beneath my ZBM root for the distro. So, eg:**
+pool
+  |---ROOT
+       |---Ubuntu
+       |     |---home
+       |
+       |---Fedora
+             |---home
+
+**This way, I have cleanly separated home directories so that one distro doesn’t conflict with another, even when both have my home directory mounted at /home/jrs–but I can also still choose to replicate, roll forward, clone, etc my home directory independently from the base distribution (and vice versa).**
+
+If you boot Fedora, then pool/ROOT/Fedora gets mounted (by ZFSBootMenu) on /. 
+This, in turn, means that pool/ROOT/Fedora/home gets mounted on /home, not because it has an explicitly set mountpoint (it doesn’t!) 
+but because it’s automatically mounted directly beneath /pool/ROOT/Fedora as its child dataset.
+Similarly, if you boot Ubuntu, ZBM mounts pool/ROOT/Ubuntu as /, and therefore /pool/ROOT/Ubuntu/home gets mounted beneath it as /home.
+When you boot Fedora, Ubuntu’s datasets aren’t mounted at all, anywhere (unless you explicitly mount them at the command line temporarily) and vice versa.
+This is in contrast to the ZBM-documentation-suggested method of keeping a separate home dataset under pool/home with an explictly ZFS-set mountpoint of /home. 
+Doing it that way means you have the same “home” dataset regardless of which OS you boot, which can lead to problems, which is why I’m recommending not doing it their way in the first place.
+
+If ZBM mounts pool/ROOT/fedora on /, then pool/ROOT/fedora/home is automounted as /home, and pool/ROOT/ubuntu/home is not mounted anywhere at all, just as pool/ROOT/ubuntu is not mounted anywhere at all.
+If you import the pool into a different system and zfs get mountpoint on both pool/ROOT/ubuntu/home and pool/ROOT/fedora/home, you’ll see both are set to “inherit” rather than to any explicit mountpoint.
+By contrast, if you set up a system the way ZBM recommends, with pool/home as a dataset with explicit mountpoint of /home, then should you import that pool into a different system (rather than booting into it with ZBM) you’ll see that zfs get mountpoint pool/home returns /home.
+If you wanted TEMPORARY access to Fedora’s home directories while Ubuntu is booted and mounted, you’d do something along the lines of zfs mount pool/ROOT/fedora/home /tmp/home. 
+That would mount all of Fedora’s home directories TEMPORARILY at /tmp/home, WITHOUT changing the ZFS property “mountpoint” permanently.
+
 
 **Switch to root user**
 ```
