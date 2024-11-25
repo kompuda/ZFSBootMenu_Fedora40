@@ -60,7 +60,7 @@ dnf install epel-release
 dnf install kernel-devel zfs
 ```
 To check the status of the modules
-# dkms status
+#dkms status
 zfs/2.1.15, 5.14.0-427.37.1.el9_4.x86_64, x86_64: installed
 ```
 dnf install -y https://zfsonlinux.org/fedora/zfs-release-2-5$(rpm --eval "%{dist}").noarch.rpm
