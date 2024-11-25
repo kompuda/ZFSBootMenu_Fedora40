@@ -44,13 +44,24 @@ sudo -i
 source /etc/os-release
 export ID
 ```
-**Install updated ZFS packages**
+**Install updated ZFS packages**  
+Remove zfs-fuse as its not maintained.
 ```
 rpm -e --nodeps zfs-fuse
 ```
+Old command
+#dnf config-manager --disable updates
+New one for DNF5
 ```
-dnf config-manager --disable updates
+sudo dnf config-manager setopt updates.enabled=0 
 ```
+```
+dnf install epel-release
+dnf install kernel-devel zfs
+```
+To check the status of the modules
+# dkms status
+zfs/2.1.15, 5.14.0-427.37.1.el9_4.x86_64, x86_64: installed
 ```
 dnf install -y https://zfsonlinux.org/fedora/zfs-release-2-5$(rpm --eval "%{dist}").noarch.rpm
 ```
